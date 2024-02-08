@@ -1,0 +1,36 @@
+<!DOCTYPE HTML >
+<HTML lang="en">
+<HEAD>
+    <meta charset="UTF-8" />
+    <TITLE>Honeypot</TITLE>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="assets/css/reset.css">
+    <link rel="stylesheet" href="assets/css/login.css">
+</HEAD>
+
+
+<body>
+<div id="grid">
+    <form action="/assets/php/login.php" method="post" class="form login">
+    <div class="form_field">
+        <label for="login_username">
+            <span class="hidden">Username</span> 
+        </label>
+        <input type="text" id="login_username" name="login_username" placeholder="Username" class="form_input" required>
+    </div>
+
+    <div class="form_field">
+        <label for="login_password">
+            <span class="hidden">Password</span>
+        </label>
+        <input type="password" id="login_password" name="login_password" placeholder="Password" class="form_input" required>
+    </div>
+
+    <div class="form_field">
+        <input class="sign_in" type="submit" value="Sign In">
+    </div>
+</form>
+<p class="text--center">Not a member? <a href="/client/register.html">Sign up now</a></p>
+</div>
+</body>
+</HTML>

@@ -1,0 +1,129 @@
+"use strict";
+let _token = {token: "group69_039-jonko"};
+
+document.addEventListener("DOMContentLoaded", init);
+
+function init() {
+    getTiles();
+    loadGameInfo();
+}
+
+function getTiles(doNotAddTileEvents) {
+    fetchFromServer("/tiles", "GET")
+        .then(tiles => {
+            document.querySelector(".board-container").innerHTML = ``;
+
+            tiles.forEach(tile => {
+                const $html =
+                    `<div class="tile" tileID = ${tile.position}>
+    <div class="property bottom">
+        <div class="property__color" style="--color:${tile.color}"></div>
+        <span class="property__name">${tile.name}</span><span class="property__price" >${tile.cost || ""}</span>
+    </div>
+</div>`;
+
+                document.querySelector(".board-container").innerHTML += $html;
+            });
+
+            document.querySelectorAll(".tile").forEach($tile => {
+                if (doNotAddTileEvents) {
+                    return;
+                }
+                $tile.addEventListener("click", getTileInfo);
+            });
+            //  getChance();
+        })
+        .catch(errorHandler);
+}
+
+
+function getTileInfo(e) {
+    const tileID = e.currentTarget.getAttribute("tileID");
+    document.querySelector(".pop-up").classList.add("open");
+    fetchFromServer(`/tiles/${tileID}`, "GET")
+        .then(tileInfo => {
+            document.querySelector(".pop-up").innerHTML = `
+
+                <div class="insertImage">
+                </div>
+                <div class="title">${tileInfo.name}</div>
+                <div class="card-info">
+                    <div class="card-details">
+                        <h2><span>${
+                tileInfo.cost || "N/A"
+            }</span><small>Price</small></h2>
+                        <h2><span>${
+                tileInfo.rent || "N/A"
+            }</span><small>Rent</small></h2>
+                         <h2><span>${
+                tileInfo.rentWithTwoHouses || "N/A"
+            }</span><small>Rent2</small></h2>
+                          <h2><span>${
+                tileInfo.rentWithThreeHouses || "N/A"
+            }</span><small>Rent3</small></h2>
+                           <h2><span>${
+                tileInfo.rentWithFourHouses || "N/A"
+            }</span><small>Rent4</small></h2>
+                           <h2><span>${
+                tileInfo.rentWithHotel || "N/A"
+            }</span><small>RentHotel</small></h2>
+                        <h2><span>${
+                tileInfo.housePrice || "N/A"
+            }</span><small>House Price</small></h2>
+                       
+                    </div>
+                    <div class="close-button">
+                        <button>Close</button>
+                    </div>
+                </div>
+         `;
+
+            getTiles(true);
+
+            document.querySelector(".close-button").addEventListener("click", () => {
+                document.querySelector(".pop-up").classList.remove("open");
+                getTiles();
+            });
+        })
+        .catch(errorHandler);
+}
+
+/*
+// All chances logged in console
+function getChance(e){
+    fetchFromServer(`/chance`, 'GET').then(allChances => {
+        console.log(JSON.stringify(allChances));
+    })
+}
+
+ */
+
+function loadGameInfo() {
+    const $player = document.querySelectorAll(".user-item");
+
+    fetchFromServer(`/games/group69_039`, "GET").then(gameInfo => {
+        gameInfo.players.forEach(player => {
+            loadPlayerInfo(player);
+        })
+
+    })
+}
+
+
+function loadPlayerInfo(user) {
+    let $userlist = document.querySelector(".user-list");
+
+    const html = `
+            <li class="user-item">
+                <span class="avatar">
+                     <img src="https://cdn.discordapp.com/attachments/957987145115643945/959037134629642310/sedan.png" alt="Pawn"/>
+                </span>
+                <span>
+                     <h5>${user.name}</h5>
+                     <h6>$ ${user.money}</h6>
+                 </span>
+                 <a href="#" class="button" onclick="grow()">View Properties</a>
+             </li>`
+
+    $userlist.insertAdjacentHTML("beforeend", html);
+}

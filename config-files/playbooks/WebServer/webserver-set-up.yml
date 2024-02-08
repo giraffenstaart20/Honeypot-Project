@@ -1,0 +1,37 @@
+---
+- name: Set up git and apache and mariadb on webserver 
+  hosts: webservers
+  vars:
+    mylink: "/home/killerb/code"
+  become: true
+
+  tasks:
+  - name:  Update all packages to their latest version
+    apt:
+      name: "*"
+      state: latest
+
+  - name: Install GIT
+    apt: "name=git update_cache=yes state=latest"
+
+  - name: Install Apache2
+    apt: "name=apache2 update_cache=yes state=latest"
+
+  - name: Installing Mariadb
+    apt: "name=mariadb-server update_cache=yes state=latest"
+
+  - name: Install php
+    apt: "name=php update_cache=yes state=latest"
+
+  - name: Start and enable mariadb service
+    service:
+      name: mariadb
+      state: started
+      enabled: yes
+
+  - name: Create directory for web code
+    ansible.builtin.file:
+      path: "{{ mylink }}"
+      state: directory
+      mode: 755
+      owner: killerb

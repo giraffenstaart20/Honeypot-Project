@@ -1,0 +1,49 @@
+---
+- name: Set up elasticsearch
+  hosts: elkservers
+  vars:
+    clustername: "honeypotcluster"
+    networkhost: "localhost"
+    httpport: "9300"
+  become: true
+
+  tasks:
+  - name:  Update all packages to their latest version
+    apt:
+      name: "*"
+      state: latest
+
+  - name: Install elasticsearch
+    apt: "name=elasticsearch update_cache=yes state=latest"
+
+  - name: changing clustername
+    ansible.builtin.lineinfile:
+      path: /etc/elasticsearch/elasticsearch.yml
+      regexp: '^cluster.name:'
+      insertafter: "^cluster.name: "
+      line: "cluster.name: {{clustername}}"
+
+  - name: changing networkhost
+    ansible.builtin.lineinfile:
+      path: /etc/elasticsearch/elasticsearch.yml
+      regexp: '^network.host:'
+      insertafter: "^network.host: "
+      line: "network.host: {{networkhost}}"
+
+
+  - name: changing http port
+    ansible.builtin.lineinfile:
+      path: /etc/elasticsearch/elasticsearch.yml
+      regexp: '^http.port:'
+      insertafter: '^http.port: '
+      line: "http.port: {{httpport}}"
+
+  - name: Enable elasticsearch
+    service:
+      name: elasticsearch
+      enabled: yes
+
+  - name: run elasticsearch
+    service:
+      name: elasticsearch
+      state: started

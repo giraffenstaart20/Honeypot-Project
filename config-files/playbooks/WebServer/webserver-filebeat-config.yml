@@ -1,0 +1,58 @@
+---
+- name: Set up filebeat
+  hosts: webservers
+  vars:
+    clustername: "honeypotcluster"
+    networkhost: "localhost"
+    httpport: "true"
+  become: true
+
+  tasks:
+  - name:  Update all packages to their latest version
+    apt:
+      name: "*"
+      state: latest
+
+  - name: Install gnupg
+    apt: "name=gnupg update_cache=yes state=latest"
+
+  
+  - name: Install apt-transport-https
+    apt: "name=apt-transport-https update_cache=yes state=latest"
+
+  - name: Set up elastic repo
+    ansible.builtin.command:
+      cmd: "{{item}}"
+    loop:
+      - "wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -"
+      - "echo 'deb https://artifacts.elastic.co/packages/8.x/apt stable main' | sudo tee -a /etc/apt/sources.list.d/elastic-8.x.list"
+      - "sudo apt update -y"
+
+  - name: Install filebeat
+    apt: "name=filebeat update_cache=yes state=latest"
+
+  - name: enable apache module
+    ansible.builtin.command: "sudo filebeat modules enable apache"
+
+  - name: change password in config file
+    ansible.builtin.lineinfile:
+      path: /etc/filebeat/modules.d/apache.yml
+      regexp: '^enabled: '
+      insertafter: "^enabled: "
+      line: "    enabled: true"
+
+  - name: pull filebeat.yml config from node controller 
+    synchronize:
+      src: "~/config-files/configfiles/filebeat.yml"
+      dest: "/etc/filebeat/"
+
+
+  - name: Enable Filebeat
+    service:
+      name: filebeat
+      enabled: yes
+
+  - name: run Filebeat
+    service:
+      name: filebeat
+      state: started

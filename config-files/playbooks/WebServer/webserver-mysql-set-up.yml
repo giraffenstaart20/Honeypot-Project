@@ -1,0 +1,43 @@
+---
+
+- name: Delete Mysql Install Files
+  hosts: webservers
+  vars:
+    bindaddress: "0.0.0.0"
+    port: "5872"
+    mysqlportpath: "/etc/mysql/my.cnf"
+    serverconfpath: "/etc/mysql/mariadb.conf.d/50-server.cnf"
+  become: true
+  
+  tasks:
+  - name: Delete all anonymous SQL user accounts
+    mysql_user:
+      user: "" 
+      host_all: yes
+      state: absent
+
+  - name: Remove the SQL test database
+    mysql_db:
+      db: "test"
+      state: absent
+
+  - name: Enable mysql to accept remote connections
+    ansible.builtin.lineinfile:
+      path: "{{serverconfpath}}"
+      regexp: '^bind-address'
+      insertafter: '^bind-address'
+      line: "bind-address: {{bindaddress}}"
+
+  - name: change port
+    ansible.builtin.command:
+      path: "{{mysqlportpath}}"
+      regexp: '^port'
+      insertafter: '^port '
+      line: "port: {{port}}"
+      
+  handlers:
+  - name: Restart mariadb
+    service:
+      name: mariadbd
+      state: restarted
+

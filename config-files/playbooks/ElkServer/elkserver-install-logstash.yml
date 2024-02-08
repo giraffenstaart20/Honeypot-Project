@@ -1,0 +1,58 @@
+---
+- name: Set up logstash
+  hosts: elkservers
+  vars:
+    mysrc: "/var/log/apache2"
+  become: true
+
+  tasks:
+  - name: Install logstash
+    apt: "name=logstash update_cache=yes state=latest"
+
+  - name: Enable logstash
+    service:
+      name: logstash
+      enabled: yes
+
+  - name: run logstash
+    service:
+      name: logstash
+      state: started
+
+  - name: add the logstash user to the elasticsearch group
+    ansible.builtin.command: "adduser logstash elasticsearch"
+
+  - name: Create directory for logfiles
+    ansible.builtin.file:
+      path: "{{ mysrc }}"
+      state: directory
+      mode: 751
+      owner: root
+
+  - name: create logstash config file
+    synchronize:
+      src:  "{{ mysrc }}"
+      dest: "{{ mysrc }}"
+      mode: '555'
+    delegate_to: elkservers
+    register: syncfile
+    run_once: true
+    with_items: 
+      - "~/config-files/configfiles/01-filebeat-input.conf"
+      - "~/config-files/configfiles/02-filebeat-output.conf"
+
+  - name: change password in config file
+    ansible.builtin.lineinfile:
+      path: /etc/kibana/kibana.yml
+      regexp: '^password => '
+      insertafter: "^password => "
+      line: "server port: {{passwordansible}}"
+
+  - name: test logstash config
+    ansible.builtin.shell: 
+      cmd: "sudo -u logstash /usr/share/logstash/bin/logstash --path.settings /etc/logstash -t"
+
+  - name: restart logstash
+    service:
+      name: logstash
+      state: restart

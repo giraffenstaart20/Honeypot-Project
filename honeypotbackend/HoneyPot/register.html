@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Honeypot</title>
+    <link rel="stylesheet" href="" />
+    <link rel="stylesheet" href="assets/css/reset.css" />
+    <link rel="stylesheet" href="assets/css/register.css" />
+  </head>
+  <body>
+    <div id="grid">
+      <form action="register.php" method="post" class="form login">
+        <div class="form_field">
+          <label for="username">
+            <span class="hidden">Username</span>
+          </label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Enter your username"
+            class="form_input"
+            required
+          />
+        </div>
+
+        <div class="form_field">
+          <label for="password">
+            <span class="hidden">Password</span>
+          </label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+            class="form_input"
+            required
+          />
+        </div>
+
+        <div class="form_field">
+          <label for="retry_password">
+            <span class="hidden">Password</span>
+          </label>
+          <input
+            type="password"
+            id="retrypassword"
+            name="retrypassword"
+            placeholder="Retype your password"
+            class="form_input"
+            required
+          />
+        </div>
+
+        <div class="form_field">
+          <input class="register" type="submit" value="Register Now" />
+        </div>
+      </form>
+      <p class="text--center">
+        Back to login page? <a href="login.html">Click here</a>
+      </p>
+    </div>
+  </body>
+</html>

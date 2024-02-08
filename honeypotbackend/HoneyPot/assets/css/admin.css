@@ -1,0 +1,12 @@
+table {
+    margin: 0.5rem;
+}
+
+table, th, td {
+    border: 1px solid;
+}
+
+#uvon {
+    border-style: 5px solid;
+    margin: O.5rem;
+}

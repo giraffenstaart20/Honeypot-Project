@@ -1,0 +1,51 @@
+---
+- name: Set up git and the prerequisites for elasticsearch
+  hosts: elkservers
+  become: true
+
+  tasks:
+  - name:  Update all packages to their latest version
+    apt:
+      name: "*"
+      state: latest
+
+  - name: Set Ntp time true
+    ansible.builtin.shell:
+      cmd: timedatectl set-ntp true
+
+  - name: Set timezone to brussels
+    timezone:
+      name: Europe/Brussels
+
+  - name: Installing git and elk requirements
+    package:
+      name: "{{item}}"
+      state: present
+      update_cache: yes
+    loop:
+     - curl
+     - gnupg
+     - build-essential
+     - git
+     - software-properties-common
+     - gnupg2
+     - apt-transport-https
+     - ca-certificates
+
+  - name: instal java
+    apt: "name=default-jdk update_cache=yes state=latest"
+
+  - name: set up env variable java
+    copy:
+      content: "JAVA_HOME='/usr/lib/jvm/java-11-openjdk-amd64/'"
+      dest: "/etc/environment"
+
+  - name: Set up elastic repo
+    ansible.builtin.command:
+      cmd: "{{item}}"
+    loop:
+      - "wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor | sudo tee /usr/share/keyrings/elasticsearch.gpg"
+      - "echo 'deb [signed-by=/usr/share/keyrings/elasticsearch.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main' | sudo tee /etc/apt/sources.list.d/elastic-8.x.list"
+      - "sudo apt update -y"
+
+

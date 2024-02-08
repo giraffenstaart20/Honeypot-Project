@@ -1,0 +1,29 @@
+---
+- name: Configure apache to use config file
+  hosts: webservers
+  vars:
+    conffile: "apache-webserver.conf"
+    defaultconfig: "000-default.conf"
+    certpath: "/etc/ssl/localcerts"
+    certkey: "honeypotkey"
+  become: true
+
+  tasks:
+  - name: create apache configfile from directory
+    synchronize:
+      src: "~/config-files/configfiles/apache-webserver.conf"
+      dest: "/etc/apache2/sites-available"
+
+  - name: disable default site config
+    ansible.builtin.shell:
+      cmd: "a2dissite {{defaultconfig}}"
+
+  - name: enable site config
+    ansible.builtin.shell:
+      cmd: "a2dissite {{conffile}}"
+
+  - name: restart apache
+    service:
+      name: apache2
+      state: restart
+      

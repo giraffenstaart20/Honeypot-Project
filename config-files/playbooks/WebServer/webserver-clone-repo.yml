@@ -1,0 +1,63 @@
+---
+- name: Clone repo using git and set up folders
+  hosts: webservers
+  vars:
+    mylink: "/home/killerb/code/honeypotbackend/HoneyPot"
+    gitdestlink: "/home/killerb/code/honeypotbackend/.git"
+    mysrc: "/var/www/webserver"
+    repolink: "git@git.ti.howest.be:TI/2022-2023/s3/websecurity-and-honeypot/students/group-14/honeypotbackend.git"
+
+  tasks:
+  - name: remove the var/www/web symlink
+    ansible.builtin.file: 
+      dest: "/var/www/webserver"
+      state: absent
+    become: true
+
+  - name: remove the honeypot folder if exists
+    ansible.builtin.file: 
+      dest: "/home/killerb/code/honeypotbackend"
+      state: absent
+    become: true
+
+  - name: clone the repo
+    ansible.builtin.shell:
+      cmd: "cd ~/code && git clone {{repolink}} && cd honeypotbackend/ && git checkout -b 1-serverbackend"
+
+  - name: remove the .git folder
+    ansible.builtin.file: 
+      dest: "{{gitdestlink}}"
+      state: absent
+
+  - name: Creating a symlink
+    ansible.builtin.file:
+      src: "{{ mylink }}"
+      dest: "{{ mysrc }}"
+      state: link
+    become: true
+
+  - name: change folder permissions
+    ansible.builtin.file:
+      path: "{{ mysrc }}"
+      state: directory
+      recurse: yes
+      owner: www-data
+      group: www-data
+      mode: 775
+    become: true
+
+  - name: make file upload possible
+    ansible.builtin.file:
+      path: "{{mysrc}}/honeypotbackend/HoneyPot/fileUploads"
+      recurse: yes
+      mode: 777
+    become: true
+
+  - name: make file upload possible
+    ansible.builtin.file:
+      path: "{{mysrc}}/honeypotbackend/HoneyPot/uploads"
+      recurse: yes
+      mode: 777
+    become: true
+
+      

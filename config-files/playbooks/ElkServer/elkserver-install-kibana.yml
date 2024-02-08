@@ -1,0 +1,35 @@
+---
+- name: Set up kibana
+  hosts: elkservers
+  vars:
+    serverport: "5601"
+    serverhost: "::"
+  become: true
+
+  tasks:
+- name: Install kibana
+  apt: "name=kibana update_cache=yes state=latest"
+
+- name: changing networkhost
+  ansible.builtin.lineinfile:
+    path: /etc/kibana/kibana.yml
+    regexp: '^server.host:'
+    insertafter: "^server host: "
+    line: "server host: {{networkhost}}"
+
+- name: changing networkhost
+  ansible.builtin.lineinfile:
+    path: /etc/kibana/kibana.yml
+    regexp: '^server.port:'
+    insertafter: "^server port: "
+    line: "server port: {{serverport}}"
+
+- name: Enable kibana
+  service:
+      name: kibana
+      enabled: yes
+
+- name: run kibana
+  service:
+      name: kibana
+      state: started
